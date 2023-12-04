@@ -14,7 +14,7 @@ class Player {
         int score;
         selection playerSelection;
         
-        Player(string playerName) : name(playerName) {}
+        Player(string playerName) : name(playerName), score(0), playerSelection(selection::invalid) {}
 };
 
 int encodeSelections(selection firstSelection, selection secondSelection) {
@@ -46,6 +46,10 @@ void printUserSelection(selection userSelection) {
             break;
     }
     cout << endl;
+}
+
+void printUserScore(Player firstPlayer, Player secondPlayer) {
+    cout << "Score (" << firstPlayer.name << ":" << firstPlayer.score << " - " << secondPlayer.score << ":" << secondPlayer.name << ")" << endl;
 }
 
 void setSelection(char input, selection *selection) {
@@ -109,6 +113,14 @@ optional<Player*> returnGameWinner(Player* firstPlayer, Player* secondPlayer) {
     return nullopt;
 }
 
+void increasePlayerScore(Player *roundWinner, Player *firstPlayer, Player *secondPlayer) {
+   if (roundWinner->name == firstPlayer->name) {
+	    firstPlayer->score++;
+	} else if (roundWinner->name == secondPlayer->name) {
+	    secondPlayer->score++;
+	}
+}
+
 void playerRound(Player *player) {
     char userInput;
 
@@ -130,16 +142,20 @@ void gameRound(int *currentRound, Player *firstPlayer, Player *secondPlayer) {
     optional<Player*> roundWinnerOptional = returnRoundWinner(firstPlayer, secondPlayer);
     if (roundWinnerOptional.has_value()) {
         Player* roundWinner = roundWinnerOptional.value();
-        
+
         cout << "Round " << *currentRound << " Outcome:" << endl;
         cout << firstPlayer->name << " chose " << selectionToString(firstPlayer->playerSelection) << "." << endl;
         cout << secondPlayer->name << " chose " << selectionToString(secondPlayer->playerSelection) << "." << endl;
+        
+        cout << endl;
         cout << roundWinner->name << " wins the Round!" << endl;
         
+        increasePlayerScore(roundWinner, firstPlayer, secondPlayer);
         (*currentRound)++;
     } else {
         cout << "No winner this Round." << endl;
     }
+    printUserScore(*firstPlayer, *secondPlayer);
     cout << endl;
 }
 
@@ -151,7 +167,7 @@ void gameSession(bool *gameOngoing, Player *firstPlayer, Player *secondPlayer) {
         gameRound(&currentRound, firstPlayer, secondPlayer);
     }
     
-    optional<Player*> gameWinnerOptional = returnRoundWinner(firstPlayer, secondPlayer);
+    optional<Player*> gameWinnerOptional = returnGameWinner(firstPlayer, secondPlayer);
     if (gameWinnerOptional.has_value()) {
         Player* gameWinner = gameWinnerOptional.value();
         cout << gameWinner->name << " wins the Game!!!" << endl;
