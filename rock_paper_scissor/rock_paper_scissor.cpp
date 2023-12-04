@@ -9,60 +9,68 @@ enum class selection {
 };
 
 class Player {
-    public: string name;
-    public: selection playerSelection;
-
-    Player(string playerName) : name(playerName) {}
+    public:
+        string name;
+        int score;
+        selection playerSelection;
+        
+        Player(string playerName) : name(playerName) {}
 };
 
 int encodeSelections(selection firstSelection, selection secondSelection) {
     return static_cast<int>(firstSelection) * 10 + static_cast<int>(secondSelection);
 }
 
-void printUserSelection(selection userSelection) {
+string selectionToString(selection userSelection) {
     switch(userSelection) {
-	case selection::rock: 
-	    cout << "You chose rock." << endl;
-	    break;
-	case selection::paper:
-	    cout << "You chose paper." << endl;
-	    break;
-	case selection::scissor: 
-	    cout << "You chose scissors." << endl;
-	    break;
-	default: 
-	    cout << "Invalid input. Please enter 'r', 'p', or 's'." << endl;
-	    break;
+        case selection::rock:
+            return "rock";
+        case selection::paper:
+            return "paper";
+        case selection::scissor:
+            return "scissors";
+        default:
+            return "invalid";
     }
 }
 
-void setSelection(char input, selection *selection) {
+void printUserSelection(selection userSelection) {
+    switch(userSelection) {
+        case selection::rock:
+        case selection::paper:
+        case selection::scissor:
+            cout << "You chose " << selectionToString(userSelection) << "." << endl;
+            break;
+        default:
+            cout << "Invalid input. Please enter 'r', 'p', or 's'." << endl;
+            break;
+    }
+    cout << endl;
+}
 
+void setSelection(char input, selection *selection) {
     switch(input) {
-	case 'r':
-	    *selection = selection::rock;
-	    break;
-	case 'p':
-	    *selection = selection::paper;
-	    break;
-	case 's':
-	    *selection = selection::scissor;
-	    break;
-	default:
-	    *selection = selection::invalid;
-	    break;
+        case 'r':
+            *selection = selection::rock;
+            break;
+        case 'p':
+            *selection = selection::paper;
+            break;
+        case 's':
+            *selection = selection::scissor;
+            break;
+        default:
+            *selection = selection::invalid;
+            break;
     }
 }
 
 void continueGameSelection(bool *gameOngoing) {
-    cout << "Want to play again? (Y/N)" << endl;
     char continueInput;
+    cout << "Want to play again? (Y/N)" << endl;
     cin >> continueInput;
-    if (continueInput == 'y' || continueInput == 'Y') {
-	*gameOngoing = true;
-    } else {
-	*gameOngoing = false;
-    }
+    
+    *gameOngoing = (continueInput == 'y' || continueInput == 'Y');
 }
 
 optional<Player*> returnRoundWinner(Player* firstPlayer, Player* secondPlayer) {
@@ -85,17 +93,26 @@ optional<Player*> returnRoundWinner(Player* firstPlayer, Player* secondPlayer) {
         case 00:
         case 11:
         case 22:
-            return std::nullopt;
+            return nullopt;
 
         default:
-            return std::nullopt;
+            return nullopt;
     }
+}
+
+optional<Player*> returnGameWinner(Player* firstPlayer, Player* secondPlayer) {
+    if (firstPlayer->score > secondPlayer->score) {
+        return firstPlayer;
+    } else if (firstPlayer->score < secondPlayer->score) {
+        return secondPlayer;
+    }
+    return nullopt;
 }
 
 void playerRound(Player *player) {
     char userInput;
 
-    cout << player->name << ", choose your input:" << endl;
+    cout << player->name << "'s turn. Choose your input:" << endl;
     cout << "r: Rock" << endl;
     cout << "p: Paper" << endl;
     cout << "s: Scissors" << endl;
@@ -103,23 +120,47 @@ void playerRound(Player *player) {
     cin >> userInput;
     setSelection(userInput, &(player->playerSelection));
     printUserSelection(player->playerSelection);
-    cout << "----" << endl;
 }
 
 void gameRound(int *currentRound, Player *firstPlayer, Player *secondPlayer) {
-    cout << "Round: " << *currentRound << endl;
+    cout << "--- Round " << *currentRound << " ----" << endl;
     playerRound(firstPlayer);
     playerRound(secondPlayer);
 
-    std::optional<Player*> winnerOptional = returnRoundWinner(firstPlayer, secondPlayer);
-    if (winnerOptional.has_value()) {
-        Player* winner = winnerOptional.value();
-        cout << winner->name << " wins the round!" << endl;
+    optional<Player*> roundWinnerOptional = returnRoundWinner(firstPlayer, secondPlayer);
+    if (roundWinnerOptional.has_value()) {
+        Player* roundWinner = roundWinnerOptional.value();
+        
+        cout << "Round " << *currentRound << " Outcome:" << endl;
+        cout << firstPlayer->name << " chose " << selectionToString(firstPlayer->playerSelection) << "." << endl;
+        cout << secondPlayer->name << " chose " << selectionToString(secondPlayer->playerSelection) << "." << endl;
+        cout << roundWinner->name << " wins the Round!" << endl;
+        
         (*currentRound)++;
     } else {
-        cout << "No winner this round." << endl;
+        cout << "No winner this Round." << endl;
+    }
+    cout << endl;
+}
+
+void gameSession(bool *gameOngoing, Player *firstPlayer, Player *secondPlayer) {
+    int rounds = 3;
+    int currentRound = 0;
+
+    while(currentRound < rounds) {
+        gameRound(&currentRound, firstPlayer, secondPlayer);
+    }
+    
+    optional<Player*> gameWinnerOptional = returnRoundWinner(firstPlayer, secondPlayer);
+    if (gameWinnerOptional.has_value()) {
+        Player* gameWinner = gameWinnerOptional.value();
+        cout << gameWinner->name << " wins the Game!!!" << endl;
+    } else {
+        cout << "No winner this Game." << endl;
         cout << "----" << endl;
     }
+    
+    continueGameSelection(gameOngoing);
 }
 
 int main() {
@@ -128,13 +169,7 @@ int main() {
     bool gameOngoing = true;
 
     while(gameOngoing) {
-        int rounds = 3;
-        int currentRound = 0;
-
-        while(currentRound < rounds) {
-            gameRound(&currentRound, &firstPlayer, &secondPlayer);
-        }
-        continueGameSelection(&gameOngoing);
+        gameSession(&gameOngoing, &firstPlayer, &secondPlayer);
     }
     
     return 0;
