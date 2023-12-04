@@ -25,6 +25,6 @@ A terminal-based Rock Paper Scissors game that allows two users to play against 
 - **Folder**: [rock_paper_scissor](https://github.com/kimnordin/cpp_projects/tree/master/rock_paper_scissor)
 
 ### [Window](https://github.com/kimnordin/cpp_projects/tree/master/window)
-Displays a window with the letters 'R', 'G', and 'B'. Each letter blinks in red, green, or blue when the corresponding 'R', 'G', or 'B' key is pressed on the keyboard. This project demonstrates basic graphical user interface (GUI) programming in C++.
+Displays a window with the letters 'R', 'G', and 'B'. The letters blinks in red, green, or blue when the corresponding 'R', 'G', or 'B' key is pressed on the keyboard. This project demonstrates basic graphical user interface (GUI) programming in C++.
 
 - **Folder**: [window](https://github.com/kimnordin/cpp_projects/tree/master/window)
